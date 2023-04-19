@@ -1,6 +1,6 @@
 {
   "name": "@yy-web/business-use",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "packageManager": "pnpm@7.1.0",
   "description": "yyweb business-use",
   "author": "Wangsh <949066041@qq.com>",
