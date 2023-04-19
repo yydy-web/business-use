@@ -1,12 +1,12 @@
-import type { MaybeComputedRef } from '@vueuse/core'
-import { resolveUnref, useToggle } from '@vueuse/core'
+import type { MaybeRefOrGetter } from '@vueuse/core'
+import { toValue, useToggle } from '@vueuse/core'
 import { onMounted, ref } from 'vue-demi'
 import { Modal } from 'ant-design-vue'
 import { getRequest } from '@yy-web/request'
 
 export interface IUseSeachOptions<T, U> {
   initSearch?: () => Partial<T & U>
-  exportApi?: MaybeComputedRef<string>
+  exportApi?: MaybeRefOrGetter<string>
   beforeSearch?: (params?: Record<string, any>) => Record<string, any>
   pageMethods?: 'get' | 'post'
   handleSearch?: (params: T & U) => void
@@ -45,7 +45,7 @@ export function useSearch<T = {}, U = {}>(options: IUseSeachOptions<T, U>) {
 
   function confirmTable(content: string, callback: () => PromiseLike<void>, cancelFn?: () => void) {
     Modal.confirm({
-      title: '温馨提示',
+      title: '提示',
       centered: true,
       content,
       okText: '确定',
@@ -83,7 +83,7 @@ export function useSearch<T = {}, U = {}>(options: IUseSeachOptions<T, U>) {
 
   function exportFile() {
     toggleExportLoading(true)
-    request.setPath(resolveUnref(exportApi!), true)
+    request.setPath(toValue(exportApi!), true)
       .downLoad(searchParams(), pageMethods).finally(() => { toggleExportLoading(false) })
   }
 

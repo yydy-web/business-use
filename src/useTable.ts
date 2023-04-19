@@ -2,9 +2,9 @@ import { inject, reactive, ref, toRefs, watch } from 'vue-demi'
 import { message } from 'ant-design-vue'
 import axios from 'axios'
 import { getRequest } from '@yy-web/request'
-import { resolveUnref, useIntervalFn, useToggle } from '@vueuse/core'
+import { toValue, useIntervalFn, useToggle } from '@vueuse/core'
 import type { Ref } from 'vue-demi'
-import type { MaybeComputedRef } from '@vueuse/core'
+import type { MaybeRefOrGetter } from '@vueuse/core'
 import type { Canceler } from 'axios'
 import type { BusinessConf } from './provice'
 import { businessKey } from './provice'
@@ -23,9 +23,9 @@ export interface IPageConf {
 }
 
 export interface UseTableOptions<T, U> extends IUseSeachOptions<T, U> {
-  api: MaybeComputedRef<string>
+  api: MaybeRefOrGetter<string>
   pagination?: boolean
-  delApi?: MaybeComputedRef<string>
+  delApi?: MaybeRefOrGetter<string>
   afterSearch?: (result: T[]) => void
   loop?: number | false
   limitSize?: number
@@ -109,7 +109,7 @@ export function useTable<T = {}, U = {}>(options: UseTableOptions<T, U>) {
       ...searchParams(),
     }
     toggleLoading(true)
-    request.setPath(resolveUnref(api))
+    request.setPath(toValue(api))
       .setConfig({ cancelToken: new axios.CancelToken(c => cancelToken = c) })[pageMethods as 'get']<any>(params)
       .then((result) => {
         const { records, total } = !pagination
@@ -124,9 +124,9 @@ export function useTable<T = {}, U = {}>(options: UseTableOptions<T, U>) {
       })
   }
 
-  function delDataRow(id: string | number, content = '是否确认删除？') {
+  function delDataRow(id: string | number, content = '是否删除？') {
     confirmTable(content, async () => {
-      return request.setPath(`${resolveUnref(delApi)}`).carry(id).del()
+      return request.setPath(`${toValue(delApi)}`).carry(id).del()
         .then(() => {
           message.success('删除成功')
           if (dataSource.value.length === 1 && pageConf.current !== 1) {
