@@ -8,6 +8,7 @@ interface TableConf {
   listKey?: string
   totalKey?: string
   initLimit?: number
+  pageOffset?: number
 }
 
 export interface BusinessConf {

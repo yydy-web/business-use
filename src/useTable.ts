@@ -51,12 +51,13 @@ export function useTable<T = {}, U = {}>(options: UseTableOptions<T, U>) {
     table: {},
   } as BusinessConf)
 
-  const { listKey, totalKey, pageKey, sizeKey, initLimit } = Object.assign({
+  const { listKey, totalKey, pageKey, sizeKey, initLimit, pageOffset } = Object.assign({
     pageKey: 'current',
     sizeKey: 'size',
     listKey: 'records',
     totalKey: 'total',
     initLimit: 10,
+    pageOffset: 0,
   }, table!)
 
   const dataSource: Ref<T[]> = ref([])
@@ -104,7 +105,7 @@ export function useTable<T = {}, U = {}>(options: UseTableOptions<T, U>) {
       cancelToken = null
     }
     const params = {
-      [pageKey!]: pageConf.current,
+      [pageKey!]: pageConf.current - pageOffset,
       [sizeKey!]: pageConf.limit,
       ...searchParams(),
     }
