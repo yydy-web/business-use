@@ -64,7 +64,7 @@ export function useTable<T extends object, U extends object = object>(options: U
 
   const {
     searchForm, initForm, cacheSearch, searchFlag, exportLoading,
-    confirmTable, exportFile, resetPage, searchPage, searchParams,
+    confirmTable, resetPage, searchPage, searchParams,
   } = useSearch<T, U>({
     firstLoad,
     exportApi,
@@ -137,7 +137,6 @@ export function useTable<T extends object, U extends object = object>(options: U
     searchFlag,
     cacheSearch,
     ...toRefs(pageConf),
-    exportFile,
     delDataRow,
     getTable,
     confirmTable,

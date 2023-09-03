@@ -1,7 +1,6 @@
 import type { MaybeRefOrGetter } from '@vueuse/core'
-import { toValue, useToggle } from '@vueuse/core'
+import { useToggle } from '@vueuse/core'
 import { inject, onMounted, ref } from 'vue-demi'
-import { getRequest } from '@yy-web/request'
 import type { BusinessConf } from './provice'
 import { businessKey } from './provice'
 
@@ -18,7 +17,6 @@ export interface IUseSeachOptions<T, U> {
 }
 
 export function useSearch<T = object, U = object>(options: IUseSeachOptions<T, U>) {
-  const request = getRequest()!
   const {
     initSearch = () => ({} as Partial<T & U>),
     beforeSearch = () => ({}),
@@ -69,12 +67,6 @@ export function useSearch<T = object, U = object>(options: IUseSeachOptions<T, U
     searchPage()
   }
 
-  function exportFile() {
-    toggleExportLoading(true)
-    request.setPath(toValue(exportApi!), true)
-      .downLoad(searchParams(), pageMethods).finally(() => { toggleExportLoading(false) })
-  }
-
   return {
     searchFlag,
     initForm,
@@ -84,7 +76,6 @@ export function useSearch<T = object, U = object>(options: IUseSeachOptions<T, U
     searchParams,
     searchPage,
     resetPage,
-    exportFile,
     confirmTable,
   }
 }
