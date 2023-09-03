@@ -1,5 +1,7 @@
 <script lang="ts" setup>
 import { useTable } from '@yy-web/business-use'
+import { getRequest } from '@yy-web/request'
+
 const columns = [
   {
     name: 'id',
@@ -14,12 +16,16 @@ const columns = [
 ]
 
 const { dataSource, loading, current, limit, total, searchForm, searchTable, resetTable } = useTable<{ a: string }>({
-  api: '/banner/page',
+  apiAction: (params) => {
+    return getRequest()!.setPath('/banner/page').get(params)
+  },
 })
 </script>
 
 <template>
-  <a-input v-model:value="searchForm.a" />
+  <div>
+    <a-input v-model:value="searchForm.value.a" />
+  </div>
   <a-button type="primary" @click="searchTable">
     查询
   </a-button>

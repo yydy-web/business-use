@@ -1,12 +1,7 @@
 import { inject, reactive, ref, toRefs, watch } from 'vue-demi'
-import { message } from 'ant-design-vue'
-import axios from 'axios'
-import { getRequest } from '@yy-web/request'
-import { toValue, useIntervalFn, useToggle } from '@vueuse/core'
+import { useIntervalFn, useToggle } from '@vueuse/core'
 import type { Ref } from 'vue-demi'
-import type { MaybeRefOrGetter } from '@vueuse/core'
-import type { Canceler } from 'axios'
-import type { BusinessConf } from './provice'
+import type { BusinessConf, TableConf } from './provice'
 import { businessKey } from './provice'
 import { useSearch } from './useSearch'
 import type { IUseSeachOptions } from './useSearch'
@@ -22,23 +17,22 @@ export interface IPageConf {
   limit: number
 }
 
-export interface UseTableOptions<T, U> extends IUseSeachOptions<T, U> {
-  api: MaybeRefOrGetter<string>
+export interface UseTableOptions<T extends object, U extends object> extends IUseSeachOptions<T, U> {
+  apiAction: (data: T & U & Pick<TableConf, 'pageKey' | 'sizeKey'>) => Promise<any>
   pagination?: boolean
-  delApi?: MaybeRefOrGetter<string>
+  delAction?: (id: string | number) => Promise<boolean>
   afterSearch?: (result: T[]) => void
   loop?: number | false
   limitSize?: number
 }
 
-export function useTable<T = {}, U = {}>(options: UseTableOptions<T, U>) {
-  const request = getRequest()!
+export function useTable<T extends object, U extends object = object>(options: UseTableOptions<T, U>) {
   const {
-    api,
+    apiAction,
     firstLoad = true,
     pagination = true,
     pageMethods = 'get',
-    delApi = '',
+    delAction = undefined,
     exportApi = '',
     initSearch = () => ({} as Partial<T & U>),
     beforeSearch = () => ({}),
@@ -47,8 +41,9 @@ export function useTable<T = {}, U = {}>(options: UseTableOptions<T, U>) {
     limitSize = 0,
   } = options
 
-  const { table } = inject(businessKey, {
+  const { table, successTip } = inject(businessKey, {
     table: {},
+    successTip: undefined,
   } as BusinessConf)
 
   const { listKey, totalKey, pageKey, sizeKey, initLimit, pageOffset } = Object.assign({
@@ -94,42 +89,36 @@ export function useTable<T = {}, U = {}>(options: UseTableOptions<T, U>) {
 
   const [loading, toggleLoading] = useToggle()
 
-  let cancelToken: Canceler | null = null
-
   watch(() => pageConf.current, getTable)
   watch(() => pageConf.limit, searchPage)
 
   function getTable() {
-    if (cancelToken) {
-      cancelToken()
-      cancelToken = null
-    }
     const params = {
-      [pageKey!]: pageConf.current - pageOffset,
-      [sizeKey!]: pageConf.limit,
+      [pageKey as string]: pageConf.current - pageOffset,
+      [sizeKey as string]: pageConf.limit,
       ...searchParams(),
     }
     toggleLoading(true)
-    request.setPath(toValue(api))
-      .setConfig({ cancelToken: new axios.CancelToken(c => cancelToken = c) })[pageMethods as 'get']<any>(params)
-      .then((result) => {
-        const { records, total } = !pagination
-          ? { records: result as T[], total: (result as T[]).length }
-          : { records: result[listKey!], total: result[totalKey!] || 0 }
-        dataSource.value = records
-        pageConf.total = total
-        afterSearch(records)
-      }).finally(() => {
-        toggleLoading(false)
-        cancelToken = null
-      })
+    apiAction(params).then((result) => {
+      const { records, total } = !pagination
+        ? { records: result as T[], total: (result as T[]).length }
+        : { records: result[listKey!], total: result[totalKey!] || 0 }
+      dataSource.value = records
+      pageConf.total = total
+      afterSearch(records)
+    }).finally(() => {
+      toggleLoading(false)
+    })
   }
 
   function delDataRow(id: string | number, content = '是否删除？') {
     confirmTable(content, async () => {
-      return request.setPath(`${toValue(delApi)}`).carry(id).del()
+      if (typeof delAction === 'undefined')
+        throw new Error('error config del action')
+
+      return delAction(id)
         .then(() => {
-          message.success('删除成功')
+          successTip && successTip('删除成功！')
           if (dataSource.value.length === 1 && pageConf.current !== 1) {
             pageConf.current--
             return

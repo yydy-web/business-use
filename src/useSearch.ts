@@ -1,22 +1,23 @@
 import type { MaybeRefOrGetter } from '@vueuse/core'
 import { toValue, useToggle } from '@vueuse/core'
-import { onMounted, ref } from 'vue-demi'
-import { Modal } from 'ant-design-vue'
+import { inject, onMounted, ref } from 'vue-demi'
 import { getRequest } from '@yy-web/request'
+import type { BusinessConf } from './provice'
+import { businessKey } from './provice'
 
 export interface IUseSeachOptions<T, U> {
   initSearch?: () => Partial<T & U>
   exportApi?: MaybeRefOrGetter<string>
-  beforeSearch?: (params?: Record<string, any>) => Record<string, any>
+  beforeSearch?: (params?: U & T) => { [key: string]: any }
   pageMethods?: 'get' | 'post'
-  handleSearch?: (params: T & U) => void
+  handleSearch?: (params?: U & T) => void
   handleReset?: () => void
   beforeExport?: () => void
   afterExport?: () => void
   firstLoad?: boolean
 }
 
-export function useSearch<T = {}, U = {}>(options: IUseSeachOptions<T, U>) {
+export function useSearch<T = object, U = object>(options: IUseSeachOptions<T, U>) {
   const request = getRequest()!
   const {
     initSearch = () => ({} as Partial<T & U>),
@@ -34,34 +35,21 @@ export function useSearch<T = {}, U = {}>(options: IUseSeachOptions<T, U>) {
   const cacheSearch = ref<Partial<U & T>>({})
   const [exportLoading, toggleExportLoading] = useToggle()
 
+  const { confirmTip } = inject(businessKey, {
+    confirmTip: undefined,
+  } as BusinessConf)
+
   onMounted(() => {
     firstLoad && searchPage()
   })
 
   function searchParams() {
-    const searchParams = { ...initForm.value, ...searchForm.value, ...cacheSearch.value }
-    return { ...searchParams, ...beforeSearch(searchParams) }
+    const params: U & T = { ...initForm.value as U, ...searchForm.value as T, ...cacheSearch.value || {} }
+    return { ...params, ...beforeSearch(params) }
   }
 
-  function confirmTable(content: string, callback: () => PromiseLike<void>, cancelFn?: () => void) {
-    Modal.confirm({
-      title: '提示',
-      centered: true,
-      content,
-      okText: '确定',
-      cancelText: '取消',
-      async onOk() {
-        try {
-          await callback()
-        }
-        catch (error) {
-          return Promise.reject(error)
-        }
-      },
-      onCancel() {
-        typeof cancelFn === 'function' && cancelFn()
-      },
-    })
+  function confirmTable(content: string, callback: () => PromiseLike<void>, cancelFn?: () => PromiseLike<void>) {
+    confirmTip && confirmTip(content, callback, cancelFn)
   }
 
   function searchPage() {
@@ -73,10 +61,10 @@ export function useSearch<T = {}, U = {}>(options: IUseSeachOptions<T, U>) {
   function resetPage() {
     handleReset()
     const initSearchObj = initSearch ? initSearch() : {}
-    ;[...Object.entries(searchForm.value).map(([k, v]) => [k, Array.isArray(v) ? [] : undefined]),
-      ...Object.entries(initSearchObj)]
+    ;([...Object.entries(searchForm.value || {}).map(([k, v]) => [k, Array.isArray(v) ? [] : undefined]),
+      ...Object.entries(initSearchObj)] as [string, any][])
       .forEach(([k, v]) => {
-        k && (searchForm.value[k as string] = v)
+        k && ((searchForm.value as Record<string, any>)[k] = v)
       })
     searchPage()
   }

@@ -2,7 +2,7 @@ import type { App } from 'vue-demi'
 
 export const businessKey = Symbol('yy-business')
 
-interface TableConf {
+export interface TableConf {
   pageKey?: string
   sizeKey?: string
   listKey?: string
@@ -13,6 +13,8 @@ interface TableConf {
 
 export interface BusinessConf {
   table?: TableConf
+  confirmTip?: (content: string, successCb: () => PromiseLike<void>, cancelCb?: () => PromiseLike<void>) => void
+  successTip?: (content: string) => void
 }
 
 export function confBusiness(app: App, config?: BusinessConf) {
