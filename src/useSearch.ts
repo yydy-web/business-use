@@ -44,7 +44,7 @@ export function useSearch<T = object, U = object>(options: IUseSeachOptions<T, U
   })
 
   function searchParams() {
-    const params: U & T = { ...initForm.value as U, ...searchForm.value as T, ...cacheSearch.value || {} }
+    const params = cacheSearch.value as U & T
     return { ...params, ...beforeSearch(params) }
   }
 
