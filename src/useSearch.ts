@@ -52,7 +52,7 @@ export function useSearch<T = object, U = object>(options: IUseSeachOptions<T, U
 
   function searchPage() {
     searchFlag.value++
-    cacheSearch.value = JSON.parse(JSON.stringify(searchForm.value))
+    cacheSearch.value = JSON.parse(JSON.stringify({ ...searchForm.value || {}, ...initForm.value || {} }))
     handleSearch && handleSearch(searchParams())
   }
 
