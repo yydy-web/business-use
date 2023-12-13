@@ -1,4 +1,4 @@
-import type { App } from 'vue-demi'
+import type { App } from 'vue'
 
 export const businessKey = Symbol('yy-business')
 
@@ -15,6 +15,7 @@ export interface BusinessConf {
   table?: TableConf
   confirmTip?: (content: string, successCb: () => PromiseLike<void>, cancelCb?: () => PromiseLike<void>) => void
   successTip?: (content: string) => void
+  resetType?: string | number
 }
 
 export function confBusiness(app: App, config?: BusinessConf) {

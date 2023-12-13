@@ -1,6 +1,5 @@
-import { inject, reactive, ref, toRefs, watch } from 'vue-demi'
-import { useIntervalFn, useToggle } from '@vueuse/core'
-import type { Ref } from 'vue-demi'
+import { inject, reactive, ref, toRefs, watch } from 'vue'
+import { useToggle } from '@vueuse/core'
 import type { BusinessConf, TableConf } from './provice'
 import { businessKey } from './provice'
 import { useSearch } from './useSearch'
@@ -22,7 +21,6 @@ export interface UseTableOptions<T extends object, U extends object> extends IUs
   pagination?: boolean
   delAction?: (id: string | number) => Promise<boolean>
   afterSearch?: (result: T[]) => void
-  loop?: number | false
   limitSize?: number
 }
 
@@ -37,7 +35,6 @@ export function useTable<T extends object, U extends object = object>(options: U
     initSearch = () => ({} as Partial<T & U>),
     beforeSearch = () => ({}),
     afterSearch = () => ({}),
-    loop = false,
     limitSize = 0,
   } = options
 
@@ -55,7 +52,7 @@ export function useTable<T extends object, U extends object = object>(options: U
     pageOffset: 0,
   }, table!)
 
-  const dataSource: Ref<T[]> = ref([])
+  const dataSource = ref<T[]>([])
   const pageConf = reactive<IPageConf>({
     total: 0,
     current: 1,
@@ -63,7 +60,7 @@ export function useTable<T extends object, U extends object = object>(options: U
   })
 
   const {
-    searchForm, initForm, cacheSearch, searchFlag, exportLoading,
+    searchForm, initForm, cacheSearch, searchFlag,
     confirmTable, resetPage, searchPage, searchParams,
   } = useSearch<T, U>({
     firstLoad,
@@ -82,10 +79,6 @@ export function useTable<T extends object, U extends object = object>(options: U
       dataSource.value = []
     },
   })
-
-  loop && useIntervalFn(() => {
-    getTable()
-  }, loop)
 
   const [loading, toggleLoading] = useToggle()
 
@@ -130,7 +123,6 @@ export function useTable<T extends object, U extends object = object>(options: U
 
   return {
     loading,
-    exportLoading,
     searchForm,
     initForm,
     dataSource,
