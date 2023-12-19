@@ -1,5 +1,5 @@
 import type { MaybeRefOrGetter } from '@vueuse/core'
-import { inject, onMounted, ref } from 'vue'
+import { inject, onMounted, ref } from 'vue-demi'
 import type { BusinessConf } from './provice'
 import { businessKey } from './provice'
 

@@ -1,4 +1,4 @@
-import { inject, reactive, ref, toRefs, watch } from 'vue';
+import { inject, reactive, ref, toRefs, watch } from 'vue-demi';
 import { useToggle } from '@vueuse/core';
 import type { BusinessConf } from './provice';
 import { businessKey } from './provice';
@@ -25,7 +25,7 @@ initLimit: 10,
 pageOffset: 0,
 }, table!);
 
-const dataSource: Ref<T[]> = ref([]);
+const dataSource = ref<T[]>([]);
 const pageConf = reactive<IPageConf>({
 total: 0,
 current: 1,

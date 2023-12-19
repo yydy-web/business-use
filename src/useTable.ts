@@ -1,4 +1,4 @@
-import { inject, reactive, ref, toRefs, watch } from 'vue'
+import { inject, reactive, ref, toRefs, watch } from 'vue-demi'
 import { useToggle } from '@vueuse/core'
 import type { BusinessConf, TableConf } from './provice'
 import { businessKey } from './provice'

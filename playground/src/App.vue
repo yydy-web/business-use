@@ -1,4 +1,5 @@
 <script lang="ts" setup>
+import { useMouse } from '@vueuse/core'
 import { useTable } from '@yy-web/business-use'
 import { getRequest } from '@yy-web/request'
 
@@ -15,6 +16,8 @@ const columns = [
   },
 ]
 
+const { x, y } = useMouse()
+
 const { dataSource, loading, current, limit, total, searchForm, searchTable, resetTable } = useTable<{ a: string }>({
   apiAction: (params) => {
     return getRequest()!.setPath('/banner/page').get(params)
@@ -24,7 +27,8 @@ const { dataSource, loading, current, limit, total, searchForm, searchTable, res
 
 <template>
   <div>
-    <a-input v-model:value="searchForm.value.a" />
+    {{ x }}{{ y }}
+    <a-input v-model:value="searchForm.a" />
   </div>
   <a-button type="primary" @click="searchTable">
     查询
