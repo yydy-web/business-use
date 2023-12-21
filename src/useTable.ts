@@ -5,8 +5,8 @@ import { businessKey } from './provice'
 import { useSearch } from './useSearch'
 import type { IUseSeachOptions } from './useSearch'
 
-export interface IResponseTable<T> {
-  records: T[]
+export interface IResponseTable<Data> {
+  records: Data[]
   total: number
 }
 
@@ -16,15 +16,15 @@ export interface IPageConf {
   limit: number
 }
 
-export interface UseTableOptions<T extends object, U extends object> extends IUseSeachOptions<T, U> {
-  apiAction: (data: T & U & Pick<TableConf, 'pageKey' | 'sizeKey'>) => Promise<any>
+export interface UseTableOptions<Search extends object, Data extends object> extends IUseSeachOptions<Search> {
+  apiAction: (data: Search & Pick<TableConf, 'pageKey' | 'sizeKey'>) => Promise<any>
   pagination?: boolean
   delAction?: (id: string | number) => Promise<boolean>
-  afterSearch?: (result: T[]) => void
+  afterSearch?: (result: Data[]) => void
   limitSize?: number
 }
 
-export function useTable<T extends object, U extends object = object>(options: UseTableOptions<T, U>) {
+export function useTable<Search extends object, Data extends object = object>(options: UseTableOptions<Search, Data>) {
   const {
     apiAction,
     firstLoad = true,
@@ -32,7 +32,7 @@ export function useTable<T extends object, U extends object = object>(options: U
     pageMethods = 'get',
     delAction = undefined,
     exportApi = '',
-    initSearch = () => ({} as Partial<T & U>),
+    initSearch = () => ({} as Partial<Search>),
     beforeSearch = () => ({}),
     afterSearch = () => ({}),
     limitSize = 0,
@@ -52,7 +52,7 @@ export function useTable<T extends object, U extends object = object>(options: U
     pageOffset: 0,
   }, table!)
 
-  const dataSource = ref<T[]>([])
+  const dataSource = ref<Data[]>([])
   const pageConf = reactive<IPageConf>({
     total: 0,
     current: 1,
@@ -62,7 +62,7 @@ export function useTable<T extends object, U extends object = object>(options: U
   const {
     searchForm, initForm, cacheSearch, searchFlag,
     confirmTable, resetPage, searchPage, searchParams,
-  } = useSearch<T, U>({
+  } = useSearch<Search>({
     firstLoad,
     exportApi,
     pageMethods,
@@ -94,7 +94,7 @@ export function useTable<T extends object, U extends object = object>(options: U
     toggleLoading(true)
     apiAction(params).then((result) => {
       const { records, total } = !pagination
-        ? { records: result as T[], total: (result as T[]).length }
+        ? { records: result as Data[], total: (result as Data[]).length }
         : { records: result[listKey!], total: result[totalKey!] || 0 }
       dataSource.value = records
       pageConf.total = total

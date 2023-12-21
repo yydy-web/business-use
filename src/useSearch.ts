@@ -3,21 +3,21 @@ import { inject, onMounted, ref } from 'vue-demi'
 import type { BusinessConf } from './provice'
 import { businessKey } from './provice'
 
-export interface IUseSeachOptions<T, U> {
-  initSearch?: () => Partial<T & U>
+export interface IUseSeachOptions<T> {
+  initSearch?: () => Partial<T>
   exportApi?: MaybeRefOrGetter<string>
-  beforeSearch?: (params?: U & T) => { [key: string]: any }
+  beforeSearch?: (params?: T) => { [key: string]: any }
   pageMethods?: 'get' | 'post'
-  handleSearch?: (params?: U & T) => void
+  handleSearch?: (params?: T) => void
   handleReset?: () => void
   beforeExport?: () => void
   afterExport?: () => void
   firstLoad?: boolean
 }
 
-export function useSearch<T = object, U = object>(options: IUseSeachOptions<T, U>) {
+export function useSearch<T = object>(options: IUseSeachOptions<T>) {
   const {
-    initSearch = () => ({} as Partial<T & U>),
+    initSearch = () => ({} as Partial<T>),
     beforeSearch = () => ({}),
     handleSearch,
     handleReset = () => ({}),
@@ -25,9 +25,9 @@ export function useSearch<T = object, U = object>(options: IUseSeachOptions<T, U
   } = options
 
   const searchFlag = ref(0)
-  const initForm = ref<Partial<U>>({})
+  const initForm = ref<Partial<T>>({})
   const searchForm = ref<Partial<T>>(initSearch ? initSearch() : {})
-  const cacheSearch = ref<Partial<U & T>>({})
+  const cacheSearch = ref<Partial<T>>({})
 
   const { confirmTip, resetType } = inject(businessKey, {
     confirmTip: undefined,
@@ -39,7 +39,7 @@ export function useSearch<T = object, U = object>(options: IUseSeachOptions<T, U
   })
 
   function searchParams() {
-    const params = cacheSearch.value as U & T
+    const params = cacheSearch.value as T
     return { ...params, ...beforeSearch(params) }
   }
 
