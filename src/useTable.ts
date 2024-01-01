@@ -60,7 +60,7 @@ export function useTable<Search extends object, Data extends object = object>(op
   })
 
   const {
-    searchForm, initForm, cacheSearch, searchFlag,
+    searchForm, cacheSearch, searchFlag,
     confirmTable, resetPage, searchPage, searchParams,
   } = useSearch<Search>({
     firstLoad,
@@ -124,7 +124,6 @@ export function useTable<Search extends object, Data extends object = object>(op
   return {
     loading,
     searchForm,
-    initForm,
     dataSource,
     searchFlag,
     cacheSearch,

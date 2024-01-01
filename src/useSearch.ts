@@ -25,8 +25,7 @@ export function useSearch<T = object>(options: IUseSeachOptions<T>) {
   } = options
 
   const searchFlag = ref(0)
-  const initForm = ref<Partial<T>>({})
-  const searchForm = ref<Partial<T>>(initSearch ? initSearch() : {})
+  const searchForm = ref<Partial<T>>({})
   const cacheSearch = ref<Partial<T>>({})
 
   const { confirmTip, resetType } = inject(businessKey, {
@@ -49,15 +48,15 @@ export function useSearch<T = object>(options: IUseSeachOptions<T>) {
 
   function searchPage() {
     searchFlag.value++
-    cacheSearch.value = JSON.parse(JSON.stringify({ ...searchForm.value || {}, ...initForm.value || {} }))
+    const initForm = initSearch()
+    const cacheSearchParams = Object.assign({}, initForm, searchForm.value)
+    cacheSearch.value = JSON.parse(JSON.stringify(cacheSearchParams))
     handleSearch && handleSearch(searchParams())
   }
 
   function resetPage() {
     handleReset()
-    const initSearchObj = initSearch ? initSearch() : {}
-    ;([...Object.entries(searchForm.value || {}).map(([k, v]) => [k, Array.isArray(v) ? [] : resetType]),
-      ...Object.entries(initSearchObj)] as [string, any][])
+    ;(Object.entries(searchForm.value || {}).map(([k, v]) => [k, Array.isArray(v) ? [] : resetType]) as [string, any])
       .forEach(([k, v]) => {
         k && ((searchForm.value as Record<string, any>)[k] = v)
       })
@@ -66,7 +65,6 @@ export function useSearch<T = object>(options: IUseSeachOptions<T>) {
 
   return {
     searchFlag,
-    initForm,
     searchForm,
     cacheSearch,
     searchParams,
